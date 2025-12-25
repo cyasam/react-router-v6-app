@@ -193,9 +193,9 @@ app.get(/^\/(?!api).*/, (req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   initializeData();
-  console.log(`🚀 Mock server is running on http://localhost:${PORT}`);
+  console.log(`🚀 Mock server is running on http://0.0.0.0:${PORT}`);
   console.log(`\nAvailable routes:`);
   console.log(`  GET    /api/contacts          - Get all contacts`);
   console.log(`  POST   /api/contacts          - Create a new contact`);
