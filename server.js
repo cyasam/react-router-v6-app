@@ -144,12 +144,6 @@ app.delete('/api/contacts/:id', async (req, res) => {
   res.json({ success: true });
 });
 
-// Catch-all route - serve index.html for all non-API routes
-// This enables React Router to handle client-side routing
-app.get(/^\/(?!api).*/, (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
-});
-
 // Initialize with some sample data
 const initializeData = () => {
   contacts = [
@@ -195,7 +189,7 @@ app.get(/^\/(?!api).*/, (req, res) => {
 // Start server
 app.listen(PORT, '0.0.0.0', () => {
   initializeData();
-  console.log(`🚀 Mock server is running on http://0.0.0.0:${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
   console.log(`\nAvailable routes:`);
   console.log(`  GET    /api/contacts          - Get all contacts`);
   console.log(`  POST   /api/contacts          - Create a new contact`);
