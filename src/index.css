@@ -1,0 +1,62 @@
+@import 'tailwindcss';
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-primary-light: #3b82f6;
+  --color-primary: #2563eb;
+}
+
+@layer components {
+  /* Navigation Progress Bar */
+  .navigation-progress-bar {
+    @apply fixed top-0 left-0 right-0 h-1 z-9999 bg-transparent;
+  }
+
+  .navigation-progress-bar-fill {
+    @apply h-full transition-all duration-300 ease-in-out;
+    background: linear-gradient(90deg, #3992ff, #6eb6ff);
+    box-shadow: 0 0 10px rgba(57, 146, 255, 0.5);
+  }
+
+  /* Dark Mode Toggle */
+  .dark-mode-toggle {
+    @apply absolute bottom-5 left-1/2 -translate-x-1/2 z-10;
+  }
+
+  .toggle-btn {
+    @apply bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-full w-12 h-12 text-2xl cursor-pointer flex items-center justify-center transition-all duration-300 shadow-md hover:scale-110 hover:shadow-lg active:scale-95;
+  }
+
+  /* Leaflet dark mode */
+  .dark .leaflet-tile-pane {
+    filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg)
+      saturate(0.3) brightness(0.7);
+  }
+
+  .dark .leaflet-container {
+    @apply bg-slate-800;
+  }
+
+  .dark .leaflet-popup-content-wrapper,
+  .dark .leaflet-popup-tip {
+    @apply bg-slate-800 text-slate-100;
+  }
+
+  .dark .leaflet-control-zoom-in,
+  .dark .leaflet-control-zoom-out {
+    @apply bg-slate-800 border-slate-700 text-slate-100;
+  }
+
+  .dark .leaflet-bar a:hover {
+    @apply bg-slate-700;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
