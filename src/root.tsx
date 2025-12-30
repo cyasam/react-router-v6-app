@@ -1,15 +1,17 @@
-import { Outlet, useNavigation } from 'react-router-dom';
+import { Outlet, useNavigation, useLoaderData } from 'react-router-dom';
 import NavigationProgress from './components/NavigationProgress';
 import Sidebar from './components/Sidebar';
 import Breadcrumb from './components/Breadcrumb';
+import type { UserWithoutPassword } from './features/users/types';
 
 export default function Root() {
   const navigation = useNavigation();
+  const user = useLoaderData() as UserWithoutPassword;
 
   return (
     <div className="flex h-screen w-screen bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors">
       <NavigationProgress />
-      <Sidebar />
+      <Sidebar user={user} />
       <div
         role="main"
         className={`flex-1 p-8 w-full overflow-auto transition-opacity ${

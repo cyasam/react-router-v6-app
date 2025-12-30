@@ -1,5 +1,5 @@
 import { type ActionFunctionArgs } from 'react-router-dom';
-import { API_URL } from '../../../config';
+import { apiPut } from '../../../utils/api';
 
 export async function action({ request, params }: ActionFunctionArgs) {
   // Only allow POST requests
@@ -16,13 +16,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const formData = await request.formData();
   const favorite = formData.get('favorite') === 'true';
 
-  const response = await fetch(`${API_URL}/api/contacts/${contactId}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ favorite }),
-  });
+  const response = await apiPut(`/api/contacts/${contactId}`, { favorite });
 
   return response.json();
 }

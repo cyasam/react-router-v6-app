@@ -1,5 +1,5 @@
 import { redirect, type ActionFunctionArgs } from 'react-router-dom';
-import { API_URL } from '../../../config';
+import { apiDelete } from '../../../utils/api';
 
 export async function action({ request, params }: ActionFunctionArgs) {
   // Only allow DELETE or POST requests, not GET (prevents URL paste)
@@ -14,13 +14,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
     throw new Response('Invalid contact ID', { status: 400 });
   }
 
-  const response = await fetch(`${API_URL}/api/contacts/${contactId}`, {
-    method: 'DELETE',
-  });
+  const response = await apiDelete(`/api/contacts/${contactId}`);
 
   if (!response.ok) {
     throw new Response('Contact not found', { status: 404 });
   }
 
-  return redirect('/');
+  return redirect('/contacts');
 }

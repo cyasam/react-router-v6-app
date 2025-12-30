@@ -20,6 +20,24 @@ app.use(express.static(path.join(__dirname, 'dist')));
 let contacts = [];
 let nextId = 1;
 
+// In-memory users database (for demo purposes only)
+const users = [
+  {
+    id: '1',
+    email: 'admin@example.com',
+    password: 'admin123', // In production, use hashed passwords!
+    name: 'Admin User',
+    createdAt: Date.now(),
+  },
+  {
+    id: '2',
+    email: 'user@example.com',
+    password: 'password123',
+    name: 'Demo User',
+    createdAt: Date.now(),
+  },
+];
+
 // Helper function to find contact by ID
 const findContact = (id) => contacts.find(contact => contact.id === id);
 
@@ -27,6 +45,96 @@ const findContact = (id) => contacts.find(contact => contact.id === id);
 const fakeNetwork = () => new Promise(resolve => setTimeout(resolve, Math.random() * 800));
 
 // ===== API Routes =====
+
+// POST /api/auth/login - Login with credentials
+app.post('/api/auth/login', async (req, res) => {
+  await fakeNetwork();
+
+  const { email, password } = req.body;
+
+  // Validate input
+  if (!email || !password) {
+    return res.status(400).json({
+      error: 'Email and password are required',
+      field: !email ? 'email' : 'password'
+    });
+  }
+
+  // Find user by email
+  const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+
+  if (!user) {
+    return res.status(401).json({
+      error: 'Invalid email or password',
+      field: 'email'
+    });
+  }
+
+  // Check password (in production, use bcrypt.compare)
+  if (user.password !== password) {
+    return res.status(401).json({
+      error: 'Invalid email or password',
+      field: 'password'
+    });
+  }
+
+  // Generate a simple token (in production, use JWT)
+  const token = Buffer.from(`${user.id}:${Date.now()}`).toString('base64');
+
+  // Return user info without password
+  const { password: _, ...userWithoutPassword } = user;
+
+  res.json({
+    success: true,
+    token,
+    user: userWithoutPassword,
+    message: 'Login successful',
+  });
+});
+
+// POST /api/auth/logout - Logout (for completeness)
+app.post('/api/auth/logout', async (req, res) => {
+  await fakeNetwork();
+
+  res.json({
+    success: true,
+    message: 'Logout successful',
+  });
+});
+
+// GET /api/auth/me - Get current user (with token validation)
+app.get('/api/auth/me', async (req, res) => {
+  await fakeNetwork();
+
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'No authorization token provided' });
+  }
+
+  const token = authHeader.split(' ')[1];
+
+  try {
+    // Decode simple token (in production, use JWT verification)
+    const decoded = Buffer.from(token, 'base64').toString('utf-8');
+    const [userId] = decoded.split(':');
+
+    const user = users.find(u => u.id === userId);
+
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    const { password: _, ...userWithoutPassword } = user;
+
+    res.json({
+      success: true,
+      user: userWithoutPassword,
+    });
+  } catch (error) {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+});
 
 // GET /api/contacts - Get all contacts (with optional search query)
 app.get('/api/contacts', async (req, res) => {
@@ -191,9 +299,17 @@ app.listen(PORT, '0.0.0.0', () => {
   initializeData();
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`\nAvailable routes:`);
+  console.log(`\n  Authentication:`);
+  console.log(`  POST   /api/auth/login        - Login with credentials`);
+  console.log(`  POST   /api/auth/logout       - Logout`);
+  console.log(`  GET    /api/auth/me           - Get current user`);
+  console.log(`\n  Contacts:`);
   console.log(`  GET    /api/contacts          - Get all contacts`);
   console.log(`  POST   /api/contacts          - Create a new contact`);
   console.log(`  GET    /api/contacts/:id      - Get a specific contact`);
   console.log(`  PUT    /api/contacts/:id      - Update a specific contact`);
   console.log(`  DELETE /api/contacts/:id      - Delete a specific contact`);
+  console.log(`\n  Demo Credentials:`);
+  console.log(`  Email: admin@example.com | Password: admin123`);
+  console.log(`  Email: user@example.com  | Password: password123`);
 });

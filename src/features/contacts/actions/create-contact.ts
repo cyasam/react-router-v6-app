@@ -1,6 +1,6 @@
 import { redirect, type ActionFunctionArgs } from 'react-router-dom';
 import type { ContactRecord } from '../types/contacts';
-import { API_URL } from '../../../config';
+import { apiPost } from '../../../utils/api';
 
 function sanitizeInput(value: unknown): string {
   if (!value || typeof value !== 'string') return '';
@@ -63,13 +63,7 @@ export async function action({ request }: ActionFunctionArgs) {
     }
   }
 
-  const response = await fetch(`${API_URL}/api/contacts`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(newContact),
-  });
+  const response = await apiPost('/api/contacts', newContact);
   if (!response.ok) {
     throw new Response('Failed to create contact', { status: response.status });
   }

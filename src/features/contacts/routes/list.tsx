@@ -9,9 +9,9 @@ export default function ContactList() {
     <div className="p-8">
       <ContactSearch contacts={contacts} />
       <div className="mb-8 flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 m-0">
+        <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100 m-0">
           All Contacts
-        </h1>
+        </h2>
         <Link
           to="/contacts/new"
           className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors no-underline"

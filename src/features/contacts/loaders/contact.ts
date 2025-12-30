@@ -1,5 +1,5 @@
 import { type LoaderFunctionArgs } from 'react-router-dom';
-import { API_URL } from '../../../config';
+import { apiGet } from '../../../utils/api';
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const contactId = params.contactId;
@@ -9,7 +9,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
     throw new Response('Invalid contact ID', { status: 400 });
   }
 
-  const response = await fetch(`${API_URL}/api/contacts/${contactId}`);
+  const response = await apiGet(`/api/contacts/${contactId}`);
   if (!response.ok) {
     throw new Response('Failed to fetch contact', { status: response.status });
   }

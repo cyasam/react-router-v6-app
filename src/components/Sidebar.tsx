@@ -1,7 +1,19 @@
-import { NavLink } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import UserInfo from './UserInfo';
+import SidebarLink from './SidebarLink';
+import type { UserWithoutPassword } from '../features/users/types';
 
-export default function Sidebar() {
+const navLinks = [
+  { to: '/', name: 'Dashboard' },
+  { to: '/contacts', name: 'Contacts' },
+  { to: '/users', name: 'Users', roles: ['admin', 'user'] },
+];
+
+interface SidebarProps {
+  user: UserWithoutPassword;
+}
+
+export default function Sidebar({ user }: SidebarProps) {
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem('darkMode');
     const initial = saved ? JSON.parse(saved) : false;
@@ -31,40 +43,17 @@ export default function Sidebar() {
         </h1>
       </div>
 
+      <UserInfo />
+
       <nav role="navigation" className="flex-1 overflow-auto px-8 pt-4">
         <ul className="p-0 m-0 list-none">
-          <li className="my-1">
-            <NavLink
-              to="/"
-              className={({ isActive, isPending }) =>
-                `flex items-center justify-between overflow-hidden whitespace-pre px-2 py-2 rounded-lg no-underline gap-4 font-semibold transition-all ${
-                  isActive
-                    ? 'bg-blue-600 dark:bg-blue-500 text-white dark:text-slate-900'
-                    : isPending
-                    ? 'text-blue-600 dark:text-blue-400'
-                    : 'text-slate-900 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700'
-                }`
-              }
-            >
-              Dashboard
-            </NavLink>
-          </li>
-          <li className="my-1">
-            <NavLink
-              to="/contacts"
-              className={({ isActive, isPending }) =>
-                `flex items-center justify-between overflow-hidden whitespace-pre px-2 py-2 rounded-lg no-underline gap-4 font-semibold transition-all ${
-                  isActive
-                    ? 'bg-blue-600 dark:bg-blue-500 text-white dark:text-slate-900'
-                    : isPending
-                    ? 'text-blue-600 dark:text-blue-400'
-                    : 'text-slate-900 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700'
-                }`
-              }
-            >
-              Contacts
-            </NavLink>
-          </li>
+          {navLinks
+            .filter((link) => !link.roles || link.roles.includes(user.role))
+            .map((link) => (
+              <li className="my-1" key={link.to}>
+                <SidebarLink to={link.to} name={link.name} />
+              </li>
+            ))}
         </ul>
       </nav>
 

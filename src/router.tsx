@@ -10,6 +10,13 @@ import {
   updateFavoriteAction,
   type ContactRecord,
 } from './features/contacts';
+import {
+  loginAction,
+  logoutAction,
+  allRolesLoader,
+  adminAndUserLoader,
+} from './features/auth';
+import { usersLoader, userLoader } from './features/users';
 
 export const router = createBrowserRouter([
   {
@@ -18,6 +25,7 @@ export const router = createBrowserRouter([
       const { default: Root } = await import('./root');
       return { Component: Root };
     },
+    loader: allRolesLoader,
     handle: { breadcrumb: 'Home' },
     errorElement: <ErrorPage />,
     children: [
@@ -91,6 +99,62 @@ export const router = createBrowserRouter([
             ],
           },
         ],
+      },
+      {
+        path: 'users',
+        lazy: async () => {
+          const { UsersLayout } = await import('./features/users');
+          return { Component: UsersLayout };
+        },
+        loader: adminAndUserLoader,
+        errorElement: <ErrorPage />,
+        handle: { breadcrumb: 'Users' },
+        children: [
+          {
+            index: true,
+            lazy: async () => {
+              const { UsersRoute } = await import('./features/users');
+              return { Component: UsersRoute };
+            },
+            loader: usersLoader,
+          },
+          {
+            path: ':userId',
+            lazy: async () => {
+              const { UserRoute } = await import('./features/users/');
+              return { Component: UserRoute };
+            },
+            loader: userLoader,
+            handle: {
+              breadcrumb: (data: { user?: { name: string } }) => {
+                return data?.user?.name || 'User';
+              },
+            },
+          },
+        ],
+      },
+    ],
+  },
+  {
+    path: 'auth',
+    lazy: async () => {
+      const { AuthLayout } = await import('./features/auth');
+      return { Component: AuthLayout };
+    },
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        id: 'login',
+        path: 'login',
+        lazy: async () => {
+          const { LoginRoute } = await import('./features/auth');
+          return { Component: LoginRoute };
+        },
+        action: loginAction,
+      },
+      {
+        path: 'logout',
+        action: logoutAction,
       },
     ],
   },

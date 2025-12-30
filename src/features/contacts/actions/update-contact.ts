@@ -1,6 +1,6 @@
 import { redirect, type ActionFunctionArgs } from 'react-router-dom';
 import type { ContactRecord } from '../types/contacts';
-import { API_URL } from '../../../config';
+import { apiPut } from '../../../utils/api';
 
 function sanitizeInput(value: unknown): string {
   if (!value || typeof value !== 'string') return '';
@@ -70,13 +70,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
     }
   }
 
-  await fetch(`${API_URL}/api/contacts/${contactId}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(updates),
-  });
+  await apiPut(`/api/contacts/${contactId}`, updates);
 
   return redirect(`/contacts/${contactId}`);
 }

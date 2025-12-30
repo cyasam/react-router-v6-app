@@ -1,7 +1,7 @@
-import { API_URL } from '../../../config';
+import { apiGet } from '../../../utils/api';
 
 export async function loader() {
-  const response = await fetch(`${API_URL}/api/contacts`);
+  const response = await apiGet('/api/contacts');
   if (!response.ok) {
     throw new Response('Failed to fetch contacts', { status: response.status });
   }
