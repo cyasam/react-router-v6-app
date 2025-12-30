@@ -1,9 +1,11 @@
-import { Link, useLoaderData } from 'react-router-dom';
+import { Link, useLoaderData, useRouteLoaderData } from 'react-router-dom';
 import type { ContactRecord } from '../types/contacts';
 import ContactSearch from '../components/ContactSearch';
+import type { UserWithoutPassword } from '../../users/types';
 
 export default function ContactList() {
   const { contacts } = useLoaderData() as { contacts: ContactRecord[] };
+  const user = useRouteLoaderData('root') as UserWithoutPassword;
 
   return (
     <div className="p-8">
@@ -12,12 +14,14 @@ export default function ContactList() {
         <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100 m-0">
           All Contacts
         </h2>
-        <Link
-          to="/contacts/new"
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors no-underline"
-        >
-          New Contact
-        </Link>
+        {user.role === 'admin' && (
+          <Link
+            to="/contacts/new"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors no-underline"
+          >
+            New Contact
+          </Link>
+        )}
       </div>
 
       {contacts.length ? (
@@ -68,15 +72,17 @@ export default function ContactList() {
         </div>
       ) : (
         <div className="text-center p-16 text-slate-600 dark:text-slate-400 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800/50">
-          <p className="text-xl mb-4 text-slate-900 dark:text-slate-100">
+          <p className="text-xl text-slate-900 dark:text-slate-100">
             No contacts yet
           </p>
-          <Link
-            to="/contacts/new"
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors no-underline inline-block"
-          >
-            Create your first contact
-          </Link>
+          {user.role === 'admin' && (
+            <Link
+              to="/contacts/new"
+              className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors no-underline inline-block"
+            >
+              Create your first contact
+            </Link>
+          )}
         </div>
       )}
     </div>

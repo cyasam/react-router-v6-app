@@ -197,6 +197,14 @@ export const handlers = [
       return HttpResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Only admins can create contacts
+    if (currentUser.role !== 'admin') {
+      return HttpResponse.json(
+        { error: 'Forbidden: Only admins can create contacts' },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     if (!body) {
       return HttpResponse.json(
@@ -240,6 +248,14 @@ export const handlers = [
         return HttpResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
 
+      // Only admins can delete contacts
+      if (currentUser.role !== 'admin') {
+        return HttpResponse.json(
+          { error: 'Forbidden: Only admins can delete contacts' },
+          { status: 403 }
+        );
+      }
+
       const contactId = params.id;
 
       if (!contactId || typeof contactId !== 'string') {
@@ -268,6 +284,14 @@ export const handlers = [
 
       if (!currentUser) {
         return HttpResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+
+      // Only admins can edit contacts
+      if (currentUser.role !== 'admin') {
+        return HttpResponse.json(
+          { error: 'Forbidden: Only admins can edit contacts' },
+          { status: 403 }
+        );
       }
 
       const contactId = params.id;

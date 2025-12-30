@@ -27,6 +27,7 @@ const users = [
     email: 'admin@example.com',
     password: 'admin123', // In production, use hashed passwords!
     name: 'Admin User',
+    role: 'admin',
     createdAt: Date.now(),
   },
   {
@@ -34,6 +35,15 @@ const users = [
     email: 'user@example.com',
     password: 'password123',
     name: 'Demo User',
+    role: 'user',
+    createdAt: Date.now(),
+  },
+  {
+    id: '3',
+    email: 'guest@example.com',
+    password: 'guest123',
+    name: 'Guest User',
+    role: 'guest',
     createdAt: Date.now(),
   },
 ];
@@ -43,6 +53,28 @@ const findContact = (id) => contacts.find(contact => contact.id === id);
 
 // Helper function to generate fake network delay
 const fakeNetwork = () => new Promise(resolve => setTimeout(resolve, Math.random() * 800));
+
+// Helper function to validate authorization and get current user
+const validateAuth = (req) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return null;
+  }
+
+  const token = authHeader.split(' ')[1];
+
+  try {
+    // Decode simple token (in production, use JWT verification)
+    const decoded = Buffer.from(token, 'base64').toString('utf-8');
+    const [userId] = decoded.split(':');
+
+    const user = users.find(u => u.id === userId);
+    return user || null;
+  } catch (error) {
+    return null;
+  }
+};
 
 // ===== API Routes =====
 
@@ -92,9 +124,15 @@ app.post('/api/auth/login', async (req, res) => {
   });
 });
 
-// POST /api/auth/logout - Logout (for completeness)
+// POST /api/auth/logout - Logout
 app.post('/api/auth/logout', async (req, res) => {
   await fakeNetwork();
+
+  const currentUser = validateAuth(req);
+
+  if (!currentUser) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
 
   res.json({
     success: true,
@@ -106,39 +144,87 @@ app.post('/api/auth/logout', async (req, res) => {
 app.get('/api/auth/me', async (req, res) => {
   await fakeNetwork();
 
-  const authHeader = req.headers.authorization;
+  const currentUser = validateAuth(req);
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'No authorization token provided' });
+  if (!currentUser) {
+    return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  const token = authHeader.split(' ')[1];
+  const { password: _, ...userWithoutPassword } = currentUser;
 
-  try {
-    // Decode simple token (in production, use JWT verification)
-    const decoded = Buffer.from(token, 'base64').toString('utf-8');
-    const [userId] = decoded.split(':');
-
-    const user = users.find(u => u.id === userId);
-
-    if (!user) {
-      return res.status(401).json({ error: 'Invalid token' });
-    }
-
-    const { password: _, ...userWithoutPassword } = user;
-
-    res.json({
-      success: true,
-      user: userWithoutPassword,
-    });
-  } catch (error) {
-    return res.status(401).json({ error: 'Invalid token' });
-  }
+  res.json({
+    success: true,
+    user: userWithoutPassword,
+  });
 });
+
+// ===== User Routes =====
+
+// GET /api/users - Get all users (filtered by role)
+app.get('/api/users', async (req, res) => {
+  await fakeNetwork();
+
+  const currentUser = validateAuth(req);
+
+  if (!currentUser) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  let filteredUsers = [...users];
+
+  // Non-admin users cannot see admin users
+  if (currentUser.role !== 'admin') {
+    filteredUsers = users.filter(u => u.role !== 'admin');
+  }
+
+  // Remove passwords from response
+  const sanitizedUsers = filteredUsers.map(({ password, ...user }) => user);
+
+  res.json(sanitizedUsers);
+});
+
+// GET /api/users/:id - Get a specific user by ID
+app.get('/api/users/:id', async (req, res) => {
+  await fakeNetwork();
+
+  const currentUser = validateAuth(req);
+
+  if (!currentUser) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const { id } = req.params;
+
+  if (!id) {
+    return res.status(400).json({ error: 'Missing user ID' });
+  }
+
+  const user = users.find(u => u.id === id);
+
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  // Non-admin users cannot see admin users
+  if (user.role === 'admin' && currentUser.role !== 'admin') {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  const { password: _, ...userWithoutPassword } = user;
+  res.json(userWithoutPassword);
+});
+
+// ===== Contact Routes =====
 
 // GET /api/contacts - Get all contacts (with optional search query)
 app.get('/api/contacts', async (req, res) => {
   await fakeNetwork();
+
+  const currentUser = validateAuth(req);
+
+  if (!currentUser) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
 
   const query = req.query.q || '';
   let filteredContacts = [...contacts];
@@ -168,6 +254,17 @@ app.get('/api/contacts', async (req, res) => {
 app.post('/api/contacts', async (req, res) => {
   await fakeNetwork();
 
+  const currentUser = validateAuth(req);
+
+  if (!currentUser) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  // Only admins can create contacts
+  if (currentUser.role !== 'admin') {
+    return res.status(403).json({ error: 'Forbidden: Only admins can create contacts' });
+  }
+
   if (!req.body) {
     return res.status(400).json({ error: 'Invalid request body' });
   }
@@ -191,6 +288,12 @@ app.post('/api/contacts', async (req, res) => {
 app.get('/api/contacts/:id', async (req, res) => {
   await fakeNetwork();
 
+  const currentUser = validateAuth(req);
+
+  if (!currentUser) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
   const { id } = req.params;
 
   if (!id) {
@@ -209,6 +312,17 @@ app.get('/api/contacts/:id', async (req, res) => {
 // PUT /api/contacts/:id - Update a specific contact
 app.put('/api/contacts/:id', async (req, res) => {
   await fakeNetwork();
+
+  const currentUser = validateAuth(req);
+
+  if (!currentUser) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  // Only admins can edit contacts
+  if (currentUser.role !== 'admin') {
+    return res.status(403).json({ error: 'Forbidden: Only admins can edit contacts' });
+  }
 
   const { id } = req.params;
 
@@ -235,6 +349,17 @@ app.put('/api/contacts/:id', async (req, res) => {
 // DELETE /api/contacts/:id - Delete a specific contact
 app.delete('/api/contacts/:id', async (req, res) => {
   await fakeNetwork();
+
+  const currentUser = validateAuth(req);
+
+  if (!currentUser) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  // Only admins can delete contacts
+  if (currentUser.role !== 'admin') {
+    return res.status(403).json({ error: 'Forbidden: Only admins can delete contacts' });
+  }
 
   const { id } = req.params;
 
@@ -289,6 +414,8 @@ const initializeData = () => {
   nextId = 4;
 };
 
+
+
 // Catch-all route: serve React app for all non-API routes (must be last)
 app.get(/^\/(?!api).*/, (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
@@ -303,6 +430,9 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`  POST   /api/auth/login        - Login with credentials`);
   console.log(`  POST   /api/auth/logout       - Logout`);
   console.log(`  GET    /api/auth/me           - Get current user`);
+  console.log(`\n  Users:`);
+  console.log(`  GET    /api/users             - Get all users`);
+  console.log(`  GET    /api/users/:id         - Get a specific user`);
   console.log(`\n  Contacts:`);
   console.log(`  GET    /api/contacts          - Get all contacts`);
   console.log(`  POST   /api/contacts          - Create a new contact`);
@@ -310,6 +440,7 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`  PUT    /api/contacts/:id      - Update a specific contact`);
   console.log(`  DELETE /api/contacts/:id      - Delete a specific contact`);
   console.log(`\n  Demo Credentials:`);
-  console.log(`  Email: admin@example.com | Password: admin123`);
-  console.log(`  Email: user@example.com  | Password: password123`);
+  console.log(`  Email: admin@example.com  | Password: admin123    | Role: admin`);
+  console.log(`  Email: user@example.com   | Password: password123 | Role: user`);
+  console.log(`  Email: guest@example.com  | Password: guest123    | Role: guest`);
 });

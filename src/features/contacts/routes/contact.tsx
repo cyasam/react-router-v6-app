@@ -1,9 +1,11 @@
 import { Form, Link, useRouteLoaderData } from 'react-router-dom';
 import FavoriteButton from '../components/FavouriteButton';
 import Map from '../../../components/Map';
+import type { UserWithoutPassword } from '../../users/types';
 
 export default function Contact() {
   const { contact } = useRouteLoaderData('contact');
+  const user = useRouteLoaderData('root') as UserWithoutPassword;
 
   return (
     <div className="max-w-4xl">
@@ -68,32 +70,34 @@ export default function Contact() {
             </p>
           )}
 
-          <div className="flex gap-3 flex-wrap">
-            <Link
-              to="edit"
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors no-underline"
-            >
-              Edit
-            </Link>
-            <Form
-              method="post"
-              action="destroy"
-              onSubmit={(event) => {
-                if (
-                  !confirm('Please confirm you want to delete this record.')
-                ) {
-                  event.preventDefault();
-                }
-              }}
-            >
-              <button
-                type="submit"
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
+          {user?.role === 'admin' && (
+            <div className="flex gap-3 flex-wrap">
+              <Link
+                to="edit"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors no-underline"
               >
-                Delete
-              </button>
-            </Form>
-          </div>
+                Edit
+              </Link>
+              <Form
+                method="post"
+                action="destroy"
+                onSubmit={(event) => {
+                  if (
+                    !confirm('Please confirm you want to delete this record.')
+                  ) {
+                    event.preventDefault();
+                  }
+                }}
+              >
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
+                >
+                  Delete
+                </button>
+              </Form>
+            </div>
+          )}
         </div>
       </div>
     </div>

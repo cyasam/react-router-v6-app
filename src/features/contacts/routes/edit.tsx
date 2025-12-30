@@ -1,7 +1,7 @@
-import { Form, useLoaderData, useNavigate } from 'react-router-dom';
+import { Form, useRouteLoaderData, useNavigate } from 'react-router-dom';
 
 export default function EditContact() {
-  const { contact } = useLoaderData();
+  const { contact } = useRouteLoaderData('contact');
   const navigate = useNavigate();
 
   return (

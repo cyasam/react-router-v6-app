@@ -15,11 +15,13 @@ import {
   logoutAction,
   allRolesLoader,
   adminAndUserLoader,
+  adminOnlyLoader,
 } from './features/auth';
 import { usersLoader, userLoader } from './features/users';
 
 export const router = createBrowserRouter([
   {
+    id: 'root',
     path: '/',
     lazy: async () => {
       const { default: Root } = await import('./root');
@@ -61,6 +63,7 @@ export const router = createBrowserRouter([
               return { Component: NewRoute };
             },
             handle: { breadcrumb: 'New' },
+            loader: adminOnlyLoader,
             action: createContactAction,
           },
           {
@@ -89,11 +92,12 @@ export const router = createBrowserRouter([
                   return { Component: EditRoute };
                 },
                 handle: { breadcrumb: 'Edit' },
-                loader: contactLoader,
+                loader: adminOnlyLoader,
                 action: updateContactAction,
               },
               {
                 path: 'destroy',
+                loader: adminOnlyLoader,
                 action: deleteContactAction,
               },
             ],
