@@ -1,6 +1,5 @@
 import localforage from 'localforage';
 import { matchSorter } from 'match-sorter';
-import sortBy from 'sort-by';
 import type { ContactRecord } from '../features/contacts/types/contacts';
 
 export async function getContacts(query: string): Promise<ContactRecord[]> {
@@ -10,7 +9,21 @@ export async function getContacts(query: string): Promise<ContactRecord[]> {
   if (query) {
     contacts = matchSorter(contacts, query, { keys: ['first', 'last'] });
   }
-  return contacts.sort(sortBy('last', 'createdAt'));
+
+  contacts.sort((a, b) => {
+    const lastA = a.last ?? '';
+    const lastB = b.last ?? '';
+    const lastCompare = lastA.localeCompare(lastB, undefined, {
+      sensitivity: 'base',
+    });
+    if (lastCompare !== 0) return lastCompare;
+
+    const createdAtA = a.createdAt ?? 0;
+    const createdAtB = b.createdAt ?? 0;
+    return createdAtA - createdAtB;
+  });
+
+  return contacts;
 }
 
 export async function createContact(newContact: Partial<ContactRecord>) {
