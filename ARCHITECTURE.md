@@ -22,18 +22,17 @@ src/
 │   │   │   └── FavouriteButton.tsx
 │   │   ├── loaders/            # Data loaders
 │   │   │   ├── contact.ts
-│   │   │   └── root.ts
+│   │   │   └── contacts.ts
 │   │   ├── routes/             # Route components
 │   │   │   ├── contact.tsx
 │   │   │   ├── edit.tsx
-│   │   │   ├── index.tsx
 │   │   │   ├── list.tsx
 │   │   │   └── new.tsx
 │   │   ├── types/              # TypeScript types
 │   │   │   └── contacts.ts
 │   │   └── index.ts            # Barrel export for clean imports
 │   └── main/                   # Main app feature
-│       ├── root.tsx            # Root layout component
+│       ├── page.tsx            # Main route component
 │       └── index.ts            # Barrel export
 ├── mocks/                      # MSW mock handlers
 │   ├── browser.ts
