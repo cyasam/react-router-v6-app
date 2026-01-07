@@ -2,17 +2,16 @@ import { Form, Link } from 'react-router-dom';
 import { useState, useMemo } from 'react';
 import type { ContactRecord } from '../types/contacts';
 import { matchSorter } from 'match-sorter';
+import { useGetContactsQuery } from '../reducers/api';
 
-interface ContactSearchProps {
-  contacts: ContactRecord[];
-}
-
-export default function ContactSearch({ contacts }: ContactSearchProps) {
+export default function ContactSearch() {
   const [searchValue, setSearchValue] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
 
+  const { data: contacts } = useGetContactsQuery();
+
   const filteredContacts = useMemo(() => {
-    if (!searchValue) return contacts;
+    if (!searchValue || !contacts) return [];
     return matchSorter(contacts, searchValue, {
       keys: ['first', 'last', 'twitter'],
     });

@@ -1,7 +1,7 @@
 import { redirect } from 'react-router-dom';
-import { API_URL } from '../../../config';
 import { authStorage } from '../utils/storage';
 import type { UserRole } from '../../users/types';
+import { apiGet } from '../../../utils/api';
 
 export interface RoleProtectedLoaderOptions {
   allowedRoles: UserRole[];
@@ -30,11 +30,7 @@ export function createRoleProtectedLoader(allowedRoles: UserRole[]) {
 
     try {
       // Verify token with the API
-      const response = await fetch(`${API_URL}/api/auth/me`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await apiGet(`/api/auth/me`);
 
       if (!response.ok) {
         // Token is invalid, clear it and redirect to login with return URL

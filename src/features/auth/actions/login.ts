@@ -1,6 +1,6 @@
 import { redirect } from 'react-router-dom';
-import { API_URL } from '../../../config';
 import { authStorage } from '../utils/storage';
+import { apiPost } from '../../../utils/api';
 
 export default async function loginAction({ request }: { request: Request }) {
   const formData = await request.formData();
@@ -12,12 +12,9 @@ export default async function loginAction({ request }: { request: Request }) {
   const url = new URL(request.url);
   const returnUrl = url.searchParams.get('returnUrl') || '/';
 
-  const response = await fetch(`${API_URL}/api/auth/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ email, password }),
+  const response = await apiPost(`/api/auth/login`, {
+    email,
+    password,
   });
 
   const data = await response.json();

@@ -4,6 +4,8 @@ import './index.css';
 import 'leaflet/dist/leaflet.css';
 
 import { RouterProvider } from 'react-router-dom';
+import { store } from './store';
+import { Provider } from 'react-redux';
 
 async function enableMocking() {
   if (process.env.NODE_ENV !== 'development') {
@@ -34,7 +36,9 @@ enableMocking().then(async () => {
 
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
-      <RouterProvider router={router} />
+      <Provider store={store}>
+        <RouterProvider router={router} />
+      </Provider>
     </StrictMode>
   );
 });

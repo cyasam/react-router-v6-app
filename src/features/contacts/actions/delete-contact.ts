@@ -1,24 +1,33 @@
 import { redirect, type ActionFunctionArgs } from 'react-router-dom';
-import { apiDelete } from '../../../utils/api';
+import { store } from '../../../store';
+import contactsApi from '../reducers/api';
 
 export async function action({ request, params }: ActionFunctionArgs) {
   // Only allow DELETE or POST requests, not GET (prevents URL paste)
   if (request.method !== 'POST' && request.method !== 'DELETE') {
-    throw new Response('Method Not Allowed', { status: 405 });
+    return { error: 'Method Not Allowed' };
   }
 
   const contactId = params.contactId;
 
   // Validate contact ID format
   if (!contactId || !/^[a-zA-Z0-9]+$/.test(contactId)) {
-    throw new Response('Invalid contact ID', { status: 400 });
+    return { error: 'Invalid contact ID' };
   }
 
-  const response = await apiDelete(`/api/contacts/${contactId}`);
+  try {
+    await store
+      .dispatch(contactsApi.endpoints.deleteContact.initiate(contactId))
+      .unwrap();
 
-  if (!response.ok) {
-    throw new Response('Contact not found', { status: 404 });
+    return redirect('/contacts');
+  } catch (error) {
+    const err = error as { status?: number };
+    if (err.status === 404) {
+      return { error: 'Contact not found' };
+    }
+    return {
+      error: `Failed to delete contact (${err.status || 'Unknown error'})`,
+    };
   }
-
-  return redirect('/contacts');
 }

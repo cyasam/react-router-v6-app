@@ -71,6 +71,9 @@ export const router = createBrowserRouter([
             path: ':contactId',
             handle: {
               breadcrumb: (data: { contact: ContactRecord }) => {
+                if (!data?.contact) {
+                  return;
+                }
                 const c = data.contact as { first: string; last: string };
                 return `${c.first} ${c.last}`;
               },

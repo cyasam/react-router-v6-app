@@ -1,6 +1,7 @@
 import { redirect, type ActionFunctionArgs } from 'react-router-dom';
 import type { ContactRecord } from '../types/contacts';
-import { apiPost } from '../../../utils/api';
+import { store } from '../../../store';
+import contactsApi from '../reducers/api';
 
 function sanitizeInput(value: unknown): string {
   if (!value || typeof value !== 'string') return '';
@@ -46,7 +47,7 @@ export async function action({ request }: ActionFunctionArgs) {
   const rawData = Object.fromEntries(formData);
 
   // Sanitize and validate inputs
-  const newContact: Partial<ContactRecord> = {
+  const newContactBody: Partial<ContactRecord> = {
     first: sanitizeInput(rawData.first),
     last: sanitizeInput(rawData.last),
     twitter: sanitizeTwitterHandle(rawData.twitter),
@@ -59,15 +60,27 @@ export async function action({ request }: ActionFunctionArgs) {
   if (rawData.avatar && typeof rawData.avatar === 'string') {
     const avatarUrl = rawData.avatar.trim();
     if (avatarUrl && isValidUrl(avatarUrl)) {
-      newContact.avatar = avatarUrl.slice(0, 1000);
+      newContactBody.avatar = avatarUrl.slice(0, 1000);
     }
   }
 
-  const response = await apiPost('/api/contacts', newContact);
-  if (!response.ok) {
-    throw new Response('Failed to create contact', { status: response.status });
-  }
-  const contact = await response.json();
+  try {
+    const newContact = await store
+      .dispatch(contactsApi.endpoints.createContact.initiate(newContactBody))
+      .unwrap();
 
-  return redirect(`/contacts/${contact.id}`);
+    return redirect(`/contacts/${newContact.id}`);
+  } catch (error: unknown) {
+    // Handle RTK Query errors - return instead of throw
+    const err = error as { status?: number };
+    if (err.status === 409) {
+      return { error: 'Contact already exists' };
+    }
+    if (err.status === 400) {
+      return { error: 'Invalid contact data' };
+    }
+    return {
+      error: `Failed to create contact (${err.status || 'Unknown error'})`,
+    };
+  }
 }

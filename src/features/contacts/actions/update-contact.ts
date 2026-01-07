@@ -1,6 +1,7 @@
 import { redirect, type ActionFunctionArgs } from 'react-router-dom';
 import type { ContactRecord } from '../types/contacts';
-import { apiPut } from '../../../utils/api';
+import contactsApi from '../reducers/api';
+import { store } from '../../../store';
 
 function sanitizeInput(value: unknown): string {
   if (!value || typeof value !== 'string') return '';
@@ -70,7 +71,31 @@ export async function action({ request, params }: ActionFunctionArgs) {
     }
   }
 
-  await apiPut(`/api/contacts/${contactId}`, updates);
+  try {
+    await store
+      .dispatch(
+        contactsApi.endpoints.updateContact.initiate({
+          id: contactId,
+          data: updates,
+        })
+      )
+      .unwrap();
 
-  return redirect(`/contacts/${contactId}`);
+    return redirect(`/contacts/${contactId}`);
+  } catch (error) {
+    // Handle RTK Query errors - return instead of throw
+    const err = error as { status?: number };
+    if (err.status === 404) {
+      return { error: 'Contact not found' };
+    }
+    if (err.status === 400) {
+      return { error: 'Invalid contact data' };
+    }
+    if (err.status === 409) {
+      return { error: 'Contact conflict' };
+    }
+    return {
+      error: `Failed to update contact (${err.status || 'Unknown error'})`,
+    };
+  }
 }

@@ -1,10 +1,10 @@
-import { apiGet } from '../../../utils/api';
+import { store } from '../../../store';
+import { contactsApi } from '../reducers/api';
 
 export async function loader() {
-  const response = await apiGet('/api/contacts');
-  if (!response.ok) {
-    throw new Response('Failed to fetch contacts', { status: response.status });
-  }
-  const contacts = await response.json();
-  return { contacts };
+  const result = await store.dispatch(
+    contactsApi.endpoints.getContacts.initiate()
+  );
+
+  return result;
 }

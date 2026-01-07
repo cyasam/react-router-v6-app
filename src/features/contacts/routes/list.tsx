@@ -1,15 +1,17 @@
 import { Link, useLoaderData, useRouteLoaderData } from 'react-router-dom';
-import type { ContactRecord } from '../types/contacts';
 import ContactSearch from '../components/ContactSearch';
 import type { UserWithoutPassword } from '../../users/types';
+import type { ContactRecord } from '../types/contacts';
 
 export default function ContactList() {
-  const { contacts } = useLoaderData() as { contacts: ContactRecord[] };
+  const loaderData = useLoaderData();
   const user = useRouteLoaderData('root') as UserWithoutPassword;
+
+  const contacts = loaderData?.data ?? [];
 
   return (
     <div className="p-8">
-      <ContactSearch contacts={contacts} />
+      <ContactSearch />
       <div className="mb-8 flex justify-between items-center">
         <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100 m-0">
           All Contacts
@@ -24,9 +26,9 @@ export default function ContactList() {
         )}
       </div>
 
-      {contacts.length ? (
+      {contacts?.length ? (
         <div className="grid gap-4 grid-cols-[repeat(auto-fill,minmax(300px,1fr))]">
-          {contacts.map((contact) => (
+          {contacts.map((contact: ContactRecord) => (
             <Link
               key={contact.id}
               to={`/contacts/${contact.id}`}

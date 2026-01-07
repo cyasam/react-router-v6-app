@@ -1,22 +1,40 @@
 import { type ActionFunctionArgs } from 'react-router-dom';
-import { apiPut } from '../../../utils/api';
+import { store } from '../../../store';
+import contactsApi from '../reducers/api';
 
 export async function action({ request, params }: ActionFunctionArgs) {
   // Only allow POST requests
   if (request.method !== 'POST') {
-    throw new Response('Method Not Allowed', { status: 405 });
+    return { error: 'Method Not Allowed' };
   }
 
   const contactId = params.contactId;
 
   if (!contactId || !/^[a-zA-Z0-9]+$/.test(contactId)) {
-    throw new Response('Invalid contact ID', { status: 400 });
+    return { error: 'Invalid contact ID' };
   }
 
   const formData = await request.formData();
   const favorite = formData.get('favorite') === 'true';
 
-  const response = await apiPut(`/api/contacts/${contactId}`, { favorite });
+  try {
+    const result = await store
+      .dispatch(
+        contactsApi.endpoints.updateFavorite.initiate({
+          id: contactId,
+          favorite,
+        })
+      )
+      .unwrap();
 
-  return response.json();
+    return result;
+  } catch (error) {
+    const err = error as { status?: number };
+    if (err.status === 404) {
+      return { error: 'Contact not found' };
+    }
+    return {
+      error: `Failed to update favorite (${err.status || 'Unknown error'})`,
+    };
+  }
 }

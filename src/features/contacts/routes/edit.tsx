@@ -1,14 +1,28 @@
-import { Form, useRouteLoaderData, useNavigate } from 'react-router-dom';
+import { useRouteLoaderData, useNavigate, useFetcher } from 'react-router-dom';
 
 export default function EditContact() {
   const { contact } = useRouteLoaderData('contact');
   const navigate = useNavigate();
+  const fetcher = useFetcher();
+  const isSubmitting = fetcher.state === 'submitting';
 
   return (
-    <Form method="post" className="max-w-2xl mx-auto space-y-6">
+    <fetcher.Form method="post" className="max-w-2xl mx-auto space-y-6">
       <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-6">
         Edit Contact
       </h1>
+
+      {fetcher.state === 'idle' && fetcher.data?.message && (
+        <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-800 dark:text-green-200">
+          {fetcher.data.message}
+        </div>
+      )}
+
+      {fetcher.state === 'idle' && fetcher.data?.error && (
+        <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-800 dark:text-red-200">
+          {fetcher.data.error}
+        </div>
+      )}
 
       <div className="space-y-4">
         <div className="flex gap-4">
@@ -120,18 +134,20 @@ export default function EditContact() {
       <div className="flex gap-3 pt-4">
         <button
           type="submit"
-          className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+          disabled={isSubmitting}
+          className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors"
         >
-          Save
+          {isSubmitting ? 'Saving...' : 'Save'}
         </button>
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="px-6 py-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-900 dark:text-slate-100 rounded-lg font-medium transition-colors"
+          disabled={isSubmitting}
+          className="px-6 py-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed text-slate-900 dark:text-slate-100 rounded-lg font-medium transition-colors"
         >
           Cancel
         </button>
       </div>
-    </Form>
+    </fetcher.Form>
   );
 }
