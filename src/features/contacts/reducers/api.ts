@@ -48,17 +48,6 @@ export const contactsApi = createApi({
       }),
       invalidatesTags: ['Contacts'],
     }),
-    updateFavorite: builder.mutation<
-      ContactRecord,
-      { id: string; favorite: boolean }
-    >({
-      query: ({ id, favorite }) => ({
-        url: `/api/contacts/${id}`,
-        method: 'PUT',
-        body: { favorite },
-      }),
-      invalidatesTags: ['Contacts'],
-    }),
   }),
 });
 
@@ -67,6 +56,5 @@ export const {
   useCreateContactMutation,
   useUpdateContactMutation,
   useDeleteContactMutation,
-  useUpdateFavoriteMutation,
 } = contactsApi;
 export default contactsApi;

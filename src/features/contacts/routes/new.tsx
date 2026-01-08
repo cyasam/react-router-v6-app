@@ -1,12 +1,46 @@
 import { useFetcher, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 export default function NewContact() {
   const navigate = useNavigate();
   const fetcher = useFetcher();
   const isSubmitting = fetcher.state === 'submitting';
+  const [errors, setErrors] = useState<{ first?: string; last?: string }>({});
+
+  const validateForm = (formData: FormData) => {
+    const newErrors: { first?: string; last?: string } = {};
+    const first = formData.get('first') as string;
+    const last = formData.get('last') as string;
+
+    if (!first?.trim()) {
+      newErrors.first = 'First name is required';
+    }
+    if (!last?.trim()) {
+      newErrors.last = 'Last name is required';
+    }
+
+    return newErrors;
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const formData = new FormData(e.currentTarget);
+    const newErrors = validateForm(formData);
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      e.preventDefault();
+    } else {
+      setErrors({});
+    }
+  };
 
   return (
-    <fetcher.Form method="post" className="max-w-2xl mx-auto space-y-6">
+    <fetcher.Form
+      method="post"
+      onSubmit={handleSubmit}
+      className="max-w-2xl mx-auto space-y-6"
+      noValidate
+    >
       <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-6">
         New Contact
       </h1>
@@ -38,8 +72,18 @@ export default function NewContact() {
               aria-label="First name"
               type="text"
               name="first"
-              className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={`w-full px-4 py-2 rounded-lg border ${
+                errors.first
+                  ? 'border-red-500 dark:border-red-500'
+                  : 'border-slate-300 dark:border-slate-600'
+              } bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+              required
             />
+            {errors.first && (
+              <p className="text-red-600 dark:text-red-400 text-sm mt-1">
+                {errors.first}
+              </p>
+            )}
           </div>
           <div className="flex-1">
             <label
@@ -54,8 +98,18 @@ export default function NewContact() {
               aria-label="Last name"
               type="text"
               name="last"
-              className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={`w-full px-4 py-2 rounded-lg border ${
+                errors.last
+                  ? 'border-red-500 dark:border-red-500'
+                  : 'border-slate-300 dark:border-slate-600'
+              } bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+              required
             />
+            {errors.last && (
+              <p className="text-red-600 dark:text-red-400 text-sm mt-1">
+                {errors.last}
+              </p>
+            )}
           </div>
         </div>
 
