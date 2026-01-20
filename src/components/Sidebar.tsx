@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import UserInfo from './UserInfo';
 import SidebarLink from './SidebarLink';
 import type { UserWithoutPassword } from '../features/users/types';
 
@@ -42,8 +41,6 @@ export default function Sidebar({ user }: SidebarProps) {
           React Router Contacts
         </h1>
       </div>
-
-      <UserInfo />
 
       <nav role="navigation" className="flex-1 overflow-auto px-8 pt-4">
         <ul className="p-0 m-0 list-none">

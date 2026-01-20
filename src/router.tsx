@@ -37,7 +37,7 @@ export const router = createBrowserRouter([
           const { MainRoute } = await import('./features/main');
           return { Component: MainRoute };
         },
-        handle: { breadcrumb: 'Main' },
+        handle: { title: 'Home', breadcrumb: 'Main' },
       },
       {
         path: 'contacts',
@@ -45,7 +45,7 @@ export const router = createBrowserRouter([
           const { ContactsLayout } = await import('./features/contacts');
           return { Component: ContactsLayout };
         },
-        handle: { breadcrumb: 'Contacts' },
+        handle: { title: 'Contacts', breadcrumb: 'Contacts' },
         errorElement: <ErrorPage />,
         children: [
           {
@@ -62,7 +62,7 @@ export const router = createBrowserRouter([
               const { NewRoute } = await import('./features/contacts');
               return { Component: NewRoute };
             },
-            handle: { breadcrumb: 'New' },
+            handle: { title: 'New Contact', breadcrumb: 'New' },
             loader: adminOnlyLoader,
             action: createContactAction,
           },
@@ -70,6 +70,13 @@ export const router = createBrowserRouter([
             id: 'contact',
             path: ':contactId',
             handle: {
+              title: (data: { contact: ContactRecord }) => {
+                if (!data?.contact) {
+                  return 'Contact';
+                }
+                const c = data.contact as { first: string; last: string };
+                return `Contact: ${c.first} ${c.last}`;
+              },
               breadcrumb: (data: { contact: ContactRecord }) => {
                 if (!data?.contact) {
                   return;
@@ -94,7 +101,16 @@ export const router = createBrowserRouter([
                   const { EditRoute } = await import('./features/contacts');
                   return { Component: EditRoute };
                 },
-                handle: { breadcrumb: 'Edit' },
+                handle: {
+                  title: (data: { contact: ContactRecord }) => {
+                    if (!data?.contact) {
+                      return 'Edit Contact';
+                    }
+                    const c = data.contact as { first: string; last: string };
+                    return `Edit Contact: ${c.first} ${c.last}`;
+                  },
+                  breadcrumb: 'Edit',
+                },
                 loader: adminOnlyLoader,
                 action: updateContactAction,
               },
@@ -115,7 +131,7 @@ export const router = createBrowserRouter([
         },
         loader: adminAndUserLoader,
         errorElement: <ErrorPage />,
-        handle: { breadcrumb: 'Users' },
+        handle: { title: 'Users', breadcrumb: 'Users' },
         children: [
           {
             index: true,
@@ -133,6 +149,15 @@ export const router = createBrowserRouter([
             },
             loader: userLoader,
             handle: {
+              title: (data: { user?: { name: string } }) => {
+                const userName = data?.user?.name;
+
+                if (!userName) {
+                  return 'User';
+                }
+
+                return `User: ${userName}`;
+              },
               breadcrumb: (data: { user?: { name: string } }) => {
                 return data?.user?.name || 'User';
               },
@@ -157,6 +182,7 @@ export const router = createBrowserRouter([
           const { LoginRoute } = await import('./features/auth');
           return { Component: LoginRoute };
         },
+        handle: { title: 'Login' },
         action: loginAction,
       },
       {
