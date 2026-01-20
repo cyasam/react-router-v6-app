@@ -3,13 +3,12 @@ import type { User, UserWithoutPassword } from '../features/users/types';
 
 // Initialize users in localforage
 const initializeUsers = async () => {
-  let users = await localforage.getItem<User[]>('users');
+  let users = await localforage.getItem<UserWithoutPassword[]>('users');
   if (!users || users.length === 0) {
     users = [
       {
         id: '1',
         email: 'admin@example.com',
-        password: 'admin123',
         name: 'Admin User',
         role: 'admin',
         createdAt: Date.now(),
@@ -17,7 +16,6 @@ const initializeUsers = async () => {
       {
         id: '2',
         email: 'user@example.com',
-        password: 'password123',
         name: 'Demo User',
         role: 'user',
         createdAt: Date.now(),
@@ -25,7 +23,6 @@ const initializeUsers = async () => {
       {
         id: '3',
         email: 'guest@example.com',
-        password: 'guest123',
         name: 'Guest User',
         role: 'guest',
         createdAt: Date.now(),
@@ -37,19 +34,23 @@ const initializeUsers = async () => {
 };
 
 // Get all users
-export async function getUsers(): Promise<User[]> {
+export async function getUsers(): Promise<UserWithoutPassword[]> {
   return await initializeUsers();
 }
 
 // Find user by email
-export async function findUserByEmail(email: string): Promise<User | null> {
+export async function findUserByEmail(
+  email: string,
+): Promise<UserWithoutPassword | null> {
   const users = await getUsers();
   const user = users.find((u) => u.email.toLowerCase() === email.toLowerCase());
   return user || null;
 }
 
 // Find user by ID
-export async function findUserById(id: string): Promise<User | null> {
+export async function findUserById(
+  id: string,
+): Promise<UserWithoutPassword | null> {
   const users = await getUsers();
   const user = users.find((u) => u.id === id);
   return user || null;
@@ -58,10 +59,17 @@ export async function findUserById(id: string): Promise<User | null> {
 // Validate credentials
 export async function validateCredentials(
   email: string,
-  password: string
-): Promise<User | null> {
+  password: string,
+): Promise<UserWithoutPassword | null> {
+  // Hardcoded credentials for dev (passwords not stored in IndexedDB)
+  const devCredentials: Record<string, string> = {
+    'admin@example.com': 'admin123',
+    'user@example.com': 'password123',
+    'guest@example.com': 'guest123',
+  };
+
   const user = await findUserByEmail(email);
-  if (!user || user.password !== password) {
+  if (!user || devCredentials[email.toLowerCase()] !== password) {
     return null;
   }
   return user;

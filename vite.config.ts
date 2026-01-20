@@ -28,45 +28,6 @@ export default defineConfig({
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
         assetFileNames: 'assets/[ext]/[name]-[hash].[ext]',
-        manualChunks: (id) => {
-          // Vendor chunks - node_modules
-          if (id.includes('node_modules')) {
-            // React Router (split from other vendors)
-            if (
-              id.includes('react-router-dom') ||
-              id.includes('@remix-run/router')
-            ) {
-              return 'vendor-router';
-            }
-            // React core
-            if (id.includes('react/') || id.includes('react-dom/')) {
-              return 'vendor-react';
-            }
-            // Scheduler (React dependency)
-            if (id.includes('scheduler')) {
-              return 'vendor-react';
-            }
-            // UI/utility libraries
-            if (id.includes('match-sorter') || id.includes('sort-by')) {
-              return 'vendor-utils';
-            }
-            // Everything else
-            return 'vendor';
-          }
-
-          // Feature chunks
-          if (id.includes('features/contacts')) {
-            return 'feature-contacts';
-          }
-          if (id.includes('features/main')) {
-            return 'feature-main';
-          }
-
-          // Root layout
-          if (id.includes('src/root.tsx')) {
-            return 'layout-root';
-          }
-        },
       },
     },
     copyPublicDir: true,

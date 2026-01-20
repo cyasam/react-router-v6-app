@@ -378,41 +378,7 @@ app.delete('/api/contacts/:id', async (req, res) => {
 });
 
 // Initialize with some sample data
-const initializeData = () => {
-  contacts = [
-    {
-      id: '1',
-      first: 'John',
-      last: 'Doe',
-      avatar: 'https://i.pravatar.cc/150?img=1',
-      twitter: '@johndoe',
-      notes: 'Sample contact 1',
-      favorite: false,
-      createdAt: Date.now() - 1000000,
-    },
-    {
-      id: '2',
-      first: 'Jane',
-      last: 'Smith',
-      avatar: 'https://i.pravatar.cc/150?img=2',
-      twitter: '@janesmith',
-      notes: 'Sample contact 2',
-      favorite: true,
-      createdAt: Date.now() - 2000000,
-    },
-    {
-      id: '3',
-      first: 'Bob',
-      last: 'Johnson',
-      avatar: 'https://i.pravatar.cc/150?img=3',
-      twitter: '@bobjohnson',
-      notes: 'Sample contact 3',
-      favorite: false,
-      createdAt: Date.now() - 3000000,
-    },
-  ];
-  nextId = 4;
-};
+
 
 
 
@@ -423,7 +389,6 @@ app.get(/^\/(?!api).*/, (req, res) => {
 
 // Start server
 app.listen(PORT, '0.0.0.0', () => {
-  initializeData();
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`\nAvailable routes:`);
   console.log(`\n  Authentication:`);
