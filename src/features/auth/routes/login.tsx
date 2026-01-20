@@ -108,11 +108,6 @@ export default function LoginRoute() {
               placeholder="••••••••"
               disabled={isSubmitting}
             />
-            {errors.password && (
-              <p className="text-red-600 dark:text-red-400 text-sm mt-1">
-                {errors.password}
-              </p>
-            )}
 
             <button
               type="button"
@@ -156,6 +151,11 @@ export default function LoginRoute() {
               )}
             </button>
           </div>
+          {errors.password && (
+            <p className="text-red-600 dark:text-red-400 text-sm mt-1">
+              {errors.password}
+            </p>
+          )}
         </div>
 
         {/* Remember Me & Forgot Password */}
