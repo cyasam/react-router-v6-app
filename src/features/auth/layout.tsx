@@ -1,4 +1,5 @@
 import { Outlet } from 'react-router-dom';
+import ThemeButton from '../../components/ThemeButton';
 
 export default function AuthLayout() {
   return (
@@ -66,6 +67,7 @@ export default function AuthLayout() {
           © 2025 Your Company. All rights reserved.
         </p>
       </div>
+      <ThemeButton />
     </div>
   );
 }

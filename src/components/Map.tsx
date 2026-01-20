@@ -82,7 +82,7 @@ export default function Map({ address }: MapProps) {
           // If still no results, try extracting just major location (Istanbul, Paris, etc)
           if (!data || data.length === 0) {
             const majorCity = address.match(
-              /([A-Za-zıİğĞüÜşŞöÖçÇ]+(?:\s+[A-Za-zıİğĞüÜşŞöÖçÇ]+)*)[,/]/
+              /([A-Za-zıİğĞüÜşŞöÖçÇ]+(?:\s+[A-Za-zıİğĞüÜşŞöÖçÇ]+)*)[,/]/,
             );
             if (majorCity) {
               console.log('Trying major city:', majorCity[1]);
@@ -99,7 +99,7 @@ export default function Map({ address }: MapProps) {
           console.log('Geocoded to:', data[0].display_name);
         } else {
           setError(
-            `Could not locate "${address}". Try formats like:\n• US: "123 Main St, New York, NY 10001"\n• UK: "10 Downing Street, London, SW1A 2AA"\n• International: "Eiffel Tower, Paris, France" or "Shibuya, Tokyo, Japan"\n• City only: "Istanbul, Turkey"`
+            `Could not locate "${address}". Try formats like:\n• US: "123 Main St, New York, NY 10001"\n• UK: "10 Downing Street, London, SW1A 2AA"\n• International: "Eiffel Tower, Paris, France" or "Shibuya, Tokyo, Japan"\n• City only: "Istanbul, Turkey"`,
           );
           console.warn('No results found for:', address);
         }
@@ -116,13 +116,13 @@ export default function Map({ address }: MapProps) {
     const tryGeocode = async (searchQuery: string) => {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-          searchQuery
+          searchQuery,
         )}&limit=5&addressdetails=1`,
         {
           headers: {
             'User-Agent': 'React Router Contact App',
           },
-        }
+        },
       );
 
       if (!response.ok) {

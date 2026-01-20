@@ -4,7 +4,7 @@ import Sidebar from './components/Sidebar';
 import Breadcrumb from './components/Breadcrumb';
 import type { UserWithoutPassword } from './features/users/types';
 import Header from './components/Header';
-import useTitleUpdater from './assets/hooks/useTitleUpdater';
+import useTitleUpdater from './hooks/useTitleUpdater';
 
 export default function Root() {
   useTitleUpdater();

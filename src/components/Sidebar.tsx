@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
 import SidebarLink from './SidebarLink';
 import type { UserWithoutPassword } from '../features/users/types';
+import ThemeButton from './ThemeButton';
 
 const navLinks = [
   { to: '/', name: 'Dashboard' },
@@ -13,26 +13,6 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ user }: SidebarProps) {
-  const [isDark, setIsDark] = useState(() => {
-    const saved = localStorage.getItem('darkMode');
-    const initial = saved ? JSON.parse(saved) : false;
-    return initial;
-  });
-
-  useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    localStorage.setItem('darkMode', JSON.stringify(isDark));
-  }, [isDark]);
-
-  const handleToggle = () => {
-    const newValue = !isDark;
-    setIsDark(newValue);
-  };
-
   return (
     <div className="w-88 bg-slate-50 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col relative transition-colors">
       <div className="px-8 py-4 flex justify-center">
@@ -54,16 +34,7 @@ export default function Sidebar({ user }: SidebarProps) {
         </ul>
       </nav>
 
-      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-10">
-        <button
-          onClick={handleToggle}
-          type="button"
-          aria-label="Toggle dark mode"
-          className="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-full w-12 h-12 text-2xl cursor-pointer flex items-center justify-center transition-all duration-300 shadow-md hover:scale-110 hover:shadow-lg active:scale-95"
-        >
-          {isDark ? '🌞' : '🌙'}
-        </button>
-      </div>
+      <ThemeButton />
     </div>
   );
 }
