@@ -8,17 +8,18 @@ import {
 } from './contacts';
 import {
   validateCredentials,
-  sanitizeUser,
   generateToken,
   decodeToken,
   findUserById,
   getUsers,
 } from './auth';
 import type { ContactRecord } from '../features/contacts';
-import type { User } from '../features/users/types';
+import type { UserWithoutPassword } from '../features/users/types';
 
 // Helper function to validate authorization and get current user
-async function validateAuth(request: Request): Promise<User | null> {
+async function validateAuth(
+  request: Request,
+): Promise<UserWithoutPassword | null> {
   const authHeader = request.headers.get('authorization');
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -72,13 +73,10 @@ export const handlers = [
     // Generate token
     const token = generateToken(user.id);
 
-    // Return user without password
-    const userWithoutPassword = sanitizeUser(user);
-
     return HttpResponse.json({
       success: true,
       token,
-      user: userWithoutPassword,
+      user: user,
       message: 'Login successful',
     });
   }),
@@ -119,11 +117,9 @@ export const handlers = [
       return HttpResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
-    const userWithoutPassword = sanitizeUser(user);
-
     return HttpResponse.json({
       success: true,
-      user: userWithoutPassword,
+      user: user,
     });
   }),
 
@@ -143,8 +139,7 @@ export const handlers = [
       filteredUsers = users.filter((u) => u.role !== 'admin');
     }
 
-    const sanitizedUsers = filteredUsers.map(sanitizeUser);
-    return HttpResponse.json(sanitizedUsers);
+    return HttpResponse.json(filteredUsers);
   }),
 
   http.get(
@@ -173,8 +168,7 @@ export const handlers = [
         return HttpResponse.json({ error: 'User not found' }, { status: 404 });
       }
 
-      const sanitizedUser = sanitizeUser(user);
-      return HttpResponse.json(sanitizedUser);
+      return HttpResponse.json(user);
     },
   ),
 

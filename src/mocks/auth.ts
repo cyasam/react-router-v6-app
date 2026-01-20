@@ -28,7 +28,6 @@ const initializeUsers = async () => {
         createdAt: Date.now(),
       },
     ];
-    await localforage.setItem('users', users);
   }
   return users;
 };

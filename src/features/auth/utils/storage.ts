@@ -1,4 +1,5 @@
 // Storage utility to handle remember me functionality
+import localforage from 'localforage';
 
 type StorageType = 'local' | 'session';
 
@@ -50,11 +51,14 @@ class AuthStorage {
   }
 
   // Clear all auth data
-  clear() {
+  async clear() {
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
     sessionStorage.removeItem('authToken');
     sessionStorage.removeItem('user');
+
+    // Clear all IndexedDB data
+    await localforage.clear();
   }
 }
 
