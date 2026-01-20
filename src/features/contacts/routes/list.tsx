@@ -68,6 +68,11 @@ export default function ContactList() {
                     {contact.notes}
                   </p>
                 )}
+                {contact.createdBy && (
+                  <p className="mt-2 mb-0 text-slate-500 dark:text-slate-500 text-xs">
+                    Created by {contact.createdByName ?? contact.createdBy}
+                  </p>
+                )}
               </div>
             </Link>
           ))}

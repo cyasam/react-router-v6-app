@@ -1,7 +1,7 @@
 import { redirect } from 'react-router-dom';
 import { authStorage } from '../utils/storage';
 import type { UserRole } from '../../users/types';
-import { apiGet } from '../../../utils/api';
+import { apiGet, safeGetToken } from '../../../utils/api';
 
 export interface RoleProtectedLoaderOptions {
   allowedRoles: UserRole[];
@@ -21,7 +21,7 @@ function redirectUrl(request: Request) {
 export function createRoleProtectedLoader(allowedRoles: UserRole[]) {
   return async function roleProtectedLoader({ request }: { request: Request }) {
     // Check if user has a token
-    const token = authStorage.getToken();
+    const token = safeGetToken();
 
     if (!token) {
       // Store the current URL to redirect back after login

@@ -1,14 +1,14 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { API_URL } from '../../../config';
-import { authStorage } from '../../auth/utils/storage';
 import type { ContactRecord } from '../types/contacts';
+import { safeGetToken } from '../../../utils/api';
 
 export const contactsApi = createApi({
   reducerPath: 'contactsApi',
   baseQuery: fetchBaseQuery({
     baseUrl: API_URL,
     prepareHeaders: (headers) => {
-      const token = authStorage.getToken();
+      const token = safeGetToken();
       if (token) {
         headers.set('Authorization', `Bearer ${token}`);
       }

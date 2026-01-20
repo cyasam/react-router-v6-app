@@ -8,4 +8,6 @@ export type ContactRecord = {
   notes?: string;
   favorite?: boolean;
   createdAt: number;
+  createdBy: string;
+  createdByName?: string;
 };

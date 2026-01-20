@@ -52,7 +52,7 @@ export const handlers = [
           error: 'Email and password are required',
           field: !email ? 'email' : 'password',
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -65,7 +65,7 @@ export const handlers = [
           error: 'Invalid email or password',
           field: 'email',
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -102,7 +102,7 @@ export const handlers = [
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return HttpResponse.json(
         { error: 'No authorization token provided' },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -175,7 +175,7 @@ export const handlers = [
 
       const sanitizedUser = sanitizeUser(user);
       return HttpResponse.json(sanitizedUser);
-    }
+    },
   ),
 
   // ===== Contact Routes =====
@@ -201,7 +201,7 @@ export const handlers = [
     if (currentUser.role !== 'admin') {
       return HttpResponse.json(
         { error: 'Forbidden: Only admins can create contacts' },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -209,11 +209,15 @@ export const handlers = [
     if (!body) {
       return HttpResponse.json(
         { error: 'Invalid request body' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const contact = await createContact(body as Partial<ContactRecord>);
+    const contact = await createContact({
+      ...(body as Partial<ContactRecord>),
+      createdBy: currentUser.id,
+      createdByName: currentUser.name,
+    });
     return HttpResponse.json(contact, { status: 201 });
   }),
   http.get(
@@ -230,14 +234,14 @@ export const handlers = [
       if (!contactId || typeof contactId !== 'string') {
         return HttpResponse.json(
           { error: 'Missing contact ID' },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
       const contact = await getContact(contactId);
 
       return HttpResponse.json(contact);
-    }
+    },
   ),
   http.delete(
     'http://localhost:5000/api/contacts/:id',
@@ -252,7 +256,7 @@ export const handlers = [
       if (currentUser.role !== 'admin') {
         return HttpResponse.json(
           { error: 'Forbidden: Only admins can delete contacts' },
-          { status: 403 }
+          { status: 403 },
         );
       }
 
@@ -261,7 +265,7 @@ export const handlers = [
       if (!contactId || typeof contactId !== 'string') {
         return HttpResponse.json(
           { error: 'Missing contact ID' },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -270,12 +274,12 @@ export const handlers = [
       if (!success) {
         return HttpResponse.json(
           { error: 'Contact not found' },
-          { status: 404 }
+          { status: 404 },
         );
       }
 
       return HttpResponse.json({ success: true }, { status: 200 });
-    }
+    },
   ),
   http.put(
     'http://localhost:5000/api/contacts/:id',
@@ -290,7 +294,7 @@ export const handlers = [
       if (currentUser.role !== 'admin') {
         return HttpResponse.json(
           { error: 'Forbidden: Only admins can edit contacts' },
-          { status: 403 }
+          { status: 403 },
         );
       }
 
@@ -299,7 +303,7 @@ export const handlers = [
       if (!contactId || typeof contactId !== 'string') {
         return HttpResponse.json(
           { error: 'Missing contact ID' },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -307,15 +311,15 @@ export const handlers = [
       if (!body) {
         return HttpResponse.json(
           { error: 'Invalid request body' },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
       const contact = await updateContact(
         contactId,
-        body as Partial<ContactRecord>
+        body as Partial<ContactRecord>,
       );
       return HttpResponse.json(contact, { status: 200 });
-    }
+    },
   ),
 ];

@@ -1,6 +1,14 @@
 import { authStorage } from '../features/auth';
 import { API_URL } from '../config';
 
+export const safeGetToken = () => {
+  try {
+    return authStorage.getToken();
+  } catch {
+    return null;
+  }
+};
+
 interface FetchOptions extends RequestInit {
   requireAuth?: boolean;
 }
@@ -12,7 +20,7 @@ interface FetchOptions extends RequestInit {
  */
 export async function apiFetch(
   endpoint: string,
-  options: FetchOptions = {}
+  options: FetchOptions = {},
 ): Promise<Response> {
   const { requireAuth = true, headers = {}, ...restOptions } = options;
 
@@ -27,7 +35,8 @@ export async function apiFetch(
 
   // Add authorization header if required
   if (requireAuth) {
-    const token = authStorage.getToken();
+    const token = safeGetToken();
+
     if (token) {
       fetchHeaders.Authorization = `Bearer ${token}`;
     }
@@ -45,7 +54,7 @@ export async function apiFetch(
  */
 export async function apiGet(
   endpoint: string,
-  options: Omit<FetchOptions, 'method' | 'body'> = {}
+  options: Omit<FetchOptions, 'method' | 'body'> = {},
 ): Promise<Response> {
   return apiFetch(endpoint, { ...options, method: 'GET' });
 }
@@ -56,7 +65,7 @@ export async function apiGet(
 export async function apiPost(
   endpoint: string,
   body?: unknown,
-  options: Omit<FetchOptions, 'method' | 'body'> = {}
+  options: Omit<FetchOptions, 'method' | 'body'> = {},
 ): Promise<Response> {
   return apiFetch(endpoint, {
     ...options,
@@ -71,7 +80,7 @@ export async function apiPost(
 export async function apiPut(
   endpoint: string,
   body?: unknown,
-  options: Omit<FetchOptions, 'method' | 'body'> = {}
+  options: Omit<FetchOptions, 'method' | 'body'> = {},
 ): Promise<Response> {
   return apiFetch(endpoint, {
     ...options,
@@ -85,7 +94,7 @@ export async function apiPut(
  */
 export async function apiDelete(
   endpoint: string,
-  options: Omit<FetchOptions, 'method' | 'body'> = {}
+  options: Omit<FetchOptions, 'method' | 'body'> = {},
 ): Promise<Response> {
   return apiFetch(endpoint, { ...options, method: 'DELETE' });
 }

@@ -1,6 +1,48 @@
 import localforage from 'localforage';
 import { matchSorter } from 'match-sorter';
 import type { ContactRecord } from '../features/contacts/types/contacts';
+import { getUsers } from './auth';
+
+async function getCreatorNameMap(): Promise<Map<string, string>> {
+  const users = await getUsers();
+  const map = new Map<string, string>();
+
+  users.forEach((user) => {
+    map.set(user.id, user.name);
+  });
+
+  map.set('system', 'System');
+  return map;
+}
+
+async function attachCreatorNames(
+  contacts: ContactRecord[],
+): Promise<ContactRecord[]> {
+  if (!contacts.length) return contacts;
+
+  const map = await getCreatorNameMap();
+
+  return contacts.map((contact) => ({
+    ...contact,
+    createdByName:
+      contact.createdByName ??
+      (contact.createdBy
+        ? (map.get(contact.createdBy) ?? contact.createdBy)
+        : undefined),
+  }));
+}
+
+async function attachCreatorName(
+  contact: ContactRecord | null,
+): Promise<ContactRecord | null> {
+  if (!contact) return null;
+  const [withName] = await attachCreatorNames([contact]);
+  return withName;
+}
+
+function stripCreatorNames(contacts: ContactRecord[]): ContactRecord[] {
+  return contacts.map(({ createdByName, ...rest }) => rest);
+}
 
 export async function getContacts(query: string): Promise<ContactRecord[]> {
   await fakeNetwork(`getContacts:${query}`);
@@ -23,36 +65,47 @@ export async function getContacts(query: string): Promise<ContactRecord[]> {
     return createdAtA - createdAtB;
   });
 
-  return contacts;
+  return attachCreatorNames(contacts);
 }
 
 export async function createContact(newContact: Partial<ContactRecord>) {
   await fakeNetwork('');
   const id = Math.random().toString(36).substring(2, 9);
-  const contact: ContactRecord = { id, createdAt: Date.now(), ...newContact };
+  const contact: ContactRecord = {
+    ...newContact,
+    id,
+    createdAt: Date.now(),
+    createdBy: newContact.createdBy ?? 'system',
+  };
   const contacts = await getContacts('');
   contacts.unshift(contact);
-  await set(contacts);
-  return contact;
+  const withNames = await attachCreatorNames(contacts);
+  await set(stripCreatorNames(withNames));
+  return withNames[0];
 }
 
 export async function getContact(id: string) {
   await fakeNetwork(`contact:${id}`);
   const contacts = await localforage.getItem<ContactRecord[]>('contacts');
   const contact = contacts?.find((contact) => contact.id === id);
-  return contact ?? null;
+  return attachCreatorName(contact ?? null);
 }
 
 export async function updateContact(
   id: string,
-  updates: Partial<ContactRecord>
+  updates: Partial<ContactRecord>,
 ) {
   await fakeNetwork('');
   const contacts = await localforage.getItem<ContactRecord[]>('contacts');
   const contact = contacts?.find((contact) => contact.id === id);
   if (!contact) throw new Error('No contact found for ' + id);
   Object.assign(contact, updates);
-  if (contacts) await set(contacts);
+  if (contacts) {
+    const withNames = await attachCreatorNames(contacts);
+    await set(stripCreatorNames(withNames));
+    const updated = withNames.find((c) => c.id === id);
+    return updated as ContactRecord;
+  }
   return contact;
 }
 

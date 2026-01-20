@@ -7,7 +7,10 @@ import { RouterProvider } from 'react-router-dom';
 import { store } from './store';
 import { Provider } from 'react-redux';
 
-async function enableMocking() {
+async function initializeApp() {
+  const { runMigrations } = await import('./mocks/schema');
+  await runMigrations();
+
   if (process.env.NODE_ENV !== 'development') {
     return;
   }
@@ -29,7 +32,7 @@ async function enableMocking() {
     });
 }
 
-enableMocking().then(async () => {
+initializeApp().then(async () => {
   console.log('Rendering app...');
 
   const { router } = await import('./router');
@@ -39,6 +42,6 @@ enableMocking().then(async () => {
       <Provider store={store}>
         <RouterProvider router={router} />
       </Provider>
-    </StrictMode>
+    </StrictMode>,
   );
 });

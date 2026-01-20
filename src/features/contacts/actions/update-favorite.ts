@@ -1,8 +1,8 @@
 import { type ActionFunctionArgs } from 'react-router-dom';
 import { API_URL } from '../../../config';
-import { authStorage } from '../../auth/utils/storage';
 import { store } from '../../../store';
 import contactsApi from '../reducers/api';
+import { safeGetToken } from '../../../utils/api';
 
 export async function action({ request, params }: ActionFunctionArgs) {
   // Only allow POST requests
@@ -19,9 +19,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const formData = await request.formData();
   const favorite = formData.get('favorite') === 'true';
 
-  try {
-    const token = authStorage.getToken();
+  const token = safeGetToken();
 
+  try {
     const res = await fetch(`${API_URL}/api/contacts/${contactId}`, {
       method: 'PUT',
       headers: {
